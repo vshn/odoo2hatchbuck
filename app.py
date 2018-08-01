@@ -6,6 +6,7 @@ import logging
 import os
 import odoorpc
 from dotenv import load_dotenv  # pylint: disable=import-error
+from hatchbuck import Hatchbuck
 
 LOGFORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
@@ -16,6 +17,8 @@ def main():
     """
 
     logging.basicConfig(level=logging.DEBUG, format=LOGFORMAT)
+
+    hatchbuck = Hatchbuck(os.environ.get('HATCHBUCK_APIKEY'))
 
     odoo = odoorpc.ODOO(
         os.environ.get('ODOO_HOST'),
@@ -188,6 +191,8 @@ def main():
                         child.comment,
                     )
                 )
+                if child.email:
+                    profile = hatchbuck.search_email(child.email)
 
                 # for field in child._columns:
                 #     logging.debug((field,getattr(child, field)))

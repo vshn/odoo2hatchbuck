@@ -1,9 +1,16 @@
+certifi==2018.4.16
+chardet==3.0.4
+hatchbuck==1.0.10
+idna==2.7
 OdooRPC==0.6.1
 packaging==17.1
 pluggy==0.7.1
 py==1.5.4
+pycountry==18.5.26
 pyparsing==2.2.0
 python-dotenv==0.9.0
+requests==2.19.1
 six==1.11.0
 tox==3.1.2
+urllib3==1.23
 virtualenv==16.0.0
