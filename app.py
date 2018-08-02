@@ -193,6 +193,8 @@ def main():
                 )
                 if child.email:
                     profile = hatchbuck.search_email(child.email)
+                    if profile is not None:
+                        logging.debug('user found in CRM')
 
                 # for field in child._columns:
                 #     logging.debug((field,getattr(child, field)))
