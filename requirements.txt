@@ -1,6 +1,6 @@
 certifi==2018.4.16
 chardet==3.0.4
-hatchbuck==1.0.10
+hatchbuck==1.0.15
 idna==2.7
 OdooRPC==0.6.1
 packaging==17.1
