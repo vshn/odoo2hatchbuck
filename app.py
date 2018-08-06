@@ -170,11 +170,11 @@ def main():
 
                 logging.debug(
                     (
-                        child.name,
-                        child.title.name,
-                        child.function,
+                        child.name,  # vorname nachname
+                        child.title.name,  # titel ("Dr.")
+                        child.function,  # "DevOps Engineer"
                         # child.parent_id.name,
-                        child.parent_name,
+                        child.parent_name,  # Firmenname
                         child.email,
                         child.mobile,
                         child.phone,
@@ -193,13 +193,11 @@ def main():
                 )
                 if child.email:
                     profile = hatchbuck.search_email(child.email)
-                    if profile is not None:
-                        logging.debug('user found in CRM')
-
-                # for field in child._columns:
-                #     logging.debug((field,getattr(child, field)))
-                # for category in child.category_id:
-                #     logging.debug(category.name)
+                    if profile is None:
+                        logging.debug('user not found in CRM')
+                        # create profile
+                        # profile = hatchbuck.create()
+                    # update profile with information from odoo
 
 
 if __name__ == "__main__":
