@@ -2,13 +2,26 @@
 Sync Odoo contacts to Hatchbuck CRM
 """
 
+import argparse
 import logging
 import os
+import re
 import odoorpc
 from dotenv import load_dotenv  # pylint: disable=import-error
 from hatchbuck import Hatchbuck
 
 LOGFORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+
+def parse_arguments():
+    """Parse arguments from command line"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-n', '--noop',
+                        help='dont actually post anything to hatchbuck,'
+                             ' just log what would have been posted',
+                        action='store_true', default=False)
+    args = parser.parse_args()
+    return args
 
 
 def main():
@@ -196,7 +209,33 @@ def main():
                     if profile is None:
                         logging.debug('user not found in CRM')
                         # create profile
-                        # profile = hatchbuck.create()
+                        profile = dict()
+                        profile['firstName'] = child['name'][0].value.given
+                        profile['lastName'] = child['name'][0].value.family
+                        if 'title' in child:
+                            profile['title'] = child['title'][0].value
+                        if 'org' in child:
+                            profile['company'] = child['org'][0].value
+
+                        profile['subscribed'] = True
+                        profile['status'] = {'name': 'Lead'}
+
+                        profile['emails'] = []
+                        for email in child.get('email', []):
+                            if not re.match(r"^[^@äöü]+@[^@]+\.[^@]+$",
+                                            email.value):
+                                continue
+                            if 'WORK' in email.type_paramlist:
+                                kind = "Work"
+                            elif 'HOME' in email.type_paramlist:
+                                kind = "Home"
+                            else:
+                                kind = "Other"
+                            profile['emails'].append(
+                                {'address': email.value, 'type': kind})
+                        profile = hatchbuck.create(profile)
+                        logging.info("added profile: %s", (profile))
+                    hatchbuck.update(contactId, profile)
                     # update profile with information from odoo
 
 
