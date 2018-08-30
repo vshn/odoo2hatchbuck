@@ -8,7 +8,7 @@ script: tox
 
 stages:
   - lint
-# - test
+  - test
 jobs:
   include:
     - { stage: lint, python: 3.5, env: TOXENV=flake8 }

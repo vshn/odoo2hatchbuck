@@ -15,6 +15,7 @@ from hatchbuck import Hatchbuck
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-nested-blocks
 # pylint: disable=invalid-name
+# pylint: disable=redefined-outer-name
 
 LOGFORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
@@ -26,7 +27,8 @@ def split_name(fullname):
     parts = fullname.strip().split(' ')
     if len(parts) < 2:
         # oops, no first/lastname
-        raise Exception("only 1 word passed as first/lastname")
+        # raise Exception("only 1 word passed as first/lastname")
+        result = parts[0]
     elif len(parts) == 2:
         # the trivial case
         result = (parts[0], parts[1])
@@ -43,10 +45,12 @@ def parse_arguments():
     """Parse arguments from command line"""
     parser = argparse.ArgumentParser(
         description='sync Odoo contacts into Hatchbuck.com CRM')
-    parser.add_argument('-n', '--noop',
+    parser.add_argument('-n',
+                        '--noop',
                         help='dont actually post anything to hatchbuck,'
                              ' just log what would have been posted',
-                        action='store_true', default=False)
+                        action='store_true',
+                        default=False)
     args = parser.parse_args()
     return args
 
@@ -210,7 +214,7 @@ def main(noop=False):
                 logging.debug(
                     (
                         child.name,  # vorname nachname
-                        child.title.name,  # titel ("Dr.")
+                        # child.title.name,  # titel ("Dr.")
                         child.function,  # "DevOps Engineer"
                         # child.parent_id.name,
                         child.parent_name,  # Firmenname
@@ -230,11 +234,18 @@ def main(noop=False):
                         child.comment,
                     )
                 )
+                categories = [cat.name for cat in child.category_id]
+
                 if child.email:
                     emails = [x.strip() for x in child.email.split(',')]
-                    profile = hatchbuck.search_email(emails)
+                    profile = hatchbuck.search_email_multi(emails)
                     if profile is None:
                         logging.debug('user not found in CRM')
+                        if 'Customer' not in categories and \
+                                'Opportunity' not in categories:
+                            # don't add administrative contacts to CRM
+                            continue
+
                         # create profile
                         profile = dict()
                         firstname, lastname = split_name(child.name)
@@ -249,11 +260,26 @@ def main(noop=False):
                         profile = hatchbuck.create(profile)
                         logging.info("added profile: %s", profile)
 
+                    if 'Customer' in categories:
+                        profile = hatchbuck.update(profile['contactId'],
+                                                   {'status': 'Customer'})
+                    elif 'Opportunity' in categories:
+                        profile = hatchbuck.update(profile['contactId'], {
+                            'status': 'Customer Opportunity'})
+                    else:
+                        pass
+
+                    if child.opt_out:
+                        hatchbuck.update(profile['contactId'],
+                                         {'subscribed': False})
+
                     # update profile with information from odoo
                     if profile.get('firstName', '') == '':
+                        firstname = split_name(child.name)
                         profile = hatchbuck.profile_add(profile, 'firstName',
                                                         None, firstname)
                     if profile.get('lastName', '') == '':
+                        lastname = split_name(child.name)
                         profile = hatchbuck.profile_add(profile, 'lastName',
                                                         None, lastname)
                     for addr in emails:
@@ -284,109 +310,67 @@ def main(noop=False):
                     if re.match(r"\|", profile.get('company', '')):
                         logging.warning("found unclean company name: %s",
                                         format(profile['company']))
-
-                    for addr in profile.get('adr', []):
-                        address = {
-                            'street': addr.child.street,
-                            'zip_code': addr.child.zip,
-                            'city': addr.child.city,
-                            'country': addr.child.country_id.name,
-                        }
-                        try:
-                            if 'WORK' in addr.type_paramlist:
-                                kind = "Work"
-                            elif 'HOME' in addr.type_paramlist:
-                                kind = "Home"
-                            else:
-                                kind = "Other"
-                        except AttributeError:
-                            # if there is no type at all
-                            kind = "Other"
-                        logging.debug("adding address %s %s", address, profile)
-                        profile = hatchbuck.profile_add_address(profile,
-                                                                address,
-                                                                kind)
-                    for email in profile.get('x-skype', []):
+                    # Add address
+                    address = {
+                        'street': child.street,
+                        'zip_code': child.zip,
+                        'city': child.city,
+                        'country': child.country_id.name,
+                    }
+                    kind = "Work"
+                    logging.debug("adding address %s %s", address, profile)
+                    profile = hatchbuck.profile_add_address(profile,
+                                                            address,
+                                                            kind)
+                    # # Add website to Hatchbuck Contact
+                    profile = hatchbuck.profile_add(profile,
+                                                    'website',
+                                                    'websiteUrl',
+                                                    child.website
+                                                    )
+                    # Add phones and mobile to Hatchbuck Contact
+                    if child.phone:
                         profile = hatchbuck.profile_add(profile,
-                                                        'instantMessaging',
-                                                        'address',
-                                                        email.child.email,
-                                                        {'type': 'Skype'})
-
-                    for email in profile.get('x-msn', []):
+                                                        'phones',
+                                                        'number',
+                                                        child.phone,
+                                                        {'type': 'Work'}
+                                                        )
+                    if child.mobile:
                         profile = hatchbuck.profile_add(profile,
-                                                        'instantMessaging',
-                                                        'address',
-                                                        email.child.email,
-                                                        {
-                                                            'type':
-                                                                'Messenger'})
-
-                    for email in profile.get('x-msnim', []):
+                                                        'phones',
+                                                        'number',
+                                                        child.mobile,
+                                                        {'type': 'Mobile'}
+                                                        )
+                    # Add customFields(comment, total_invoiced, lang) to
+                    #  Hatchbuck Contact
+                    if child.comment:
                         profile = hatchbuck.profile_add(profile,
-                                                        'instantMessaging',
-                                                        'address',
-                                                        email.child.email,
-                                                        {
-                                                            'type':
-                                                                'Messenger'})
-
-                    for email in profile.get('x-twitter', []):
-                        if "twitter.com" in email.child.email:
-                            value = email.child.email
-                        else:
-                            value = "http://twitter.com/" + email. \
-                                child.email.replace('@', '')
+                                                        'customFields',
+                                                        'name',
+                                                        child.comment,
+                                                        {'type': 'MText'}
+                                                        )
+                    if child.total_invoiced:
                         profile = hatchbuck.profile_add(profile,
-                                                        'socialNetworks',
-                                                        'address', value,
-                                                        {
-                                                            'type': 'Twitter'})
-
-                    for email in profile.get('url', []) + profile. \
-                            get('x-socialprofile', []):
-                        value = email.child.email
-                        if not value.startswith("http"):
-                            value = "http://" + value
-                        if "facebook.com" in value:
-                            profile = hatchbuck.profile_add(profile,
-                                                            'socialNetworks',
-                                                            'address',
-                                                            value, {
-                                                                'type':
-                                                                    'Facebook'}
-                                                            )
-                        elif "twitter.com" in value:
-                            profile = hatchbuck.profile_add(profile,
-                                                            'socialNetworks',
-                                                            'address',
-                                                            value, {
-                                                                'type':
-                                                                    'Twitter'})
-                        else:
-                            profile = hatchbuck.profile_add(profile,
-                                                            'website',
-                                                            'websiteUrl',
-                                                            value)
-
-                    for email in profile.get('bday', []):
-                        date = {
-                            'year': email.child.email[0:4],
-                            'month': email.child.email[5:7],
-                            'day': email.child.email[8:10],
-                        }
-                        profile = hatchbuck.profile_add_birthday(profile,
-                                                                 date)
-                    # if args.tag:
-                    #     if not hatchbuck.profile_contains(profile, 'tags',
-                    #                                       'name',
-                    #                                       args.tag):
-                    #         hatchbuck.add_tag(profile['contactId'],
-                    #                           args.tag)
+                                                        'customFields',
+                                                        'name',
+                                                        child.total_invoiced,
+                                                        {'type': 'Number'}
+                                                        )
+                    profile = hatchbuck.profile_add(profile,
+                                                    'customFields',
+                                                    'name',
+                                                    child.lang,
+                                                    {'type': 'Text'}
+                                                    )
+                    # Add tag field to Hatchbuck Contact
+                    hatchbuck.add_tag(profile['contactId'], 'ERP')
 
 
 if __name__ == "__main__":
     # load settings from .env for development
     load_dotenv()
-    arg = parse_arguments()
-    main(noop=arg.noop)
+    args = parse_arguments()
+    main(noop=args.noop)
