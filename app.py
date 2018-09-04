@@ -28,17 +28,17 @@ def split_name(fullname):
     if len(parts) < 2:
         # oops, no first/lastname
         # raise Exception("only 1 word passed as first/lastname")
-        result = parts[0]
+        first, last = ('', parts[0])
     elif len(parts) == 2:
         # the trivial case
-        result = (parts[0], parts[1])
+        first, last = (parts[0], parts[1])
     else:
         # "jean marc de fleurier" -> "jean marc", "de fleurier"
         if parts[-2].lower() in ['van', 'von', 'de', 'zu', 'da']:
-            result = (' '.join(parts[:-2]), ' '.join(parts[-2:]))
+            first, last = (' '.join(parts[:-2]), ' '.join(parts[-2:]))
         else:
-            result = (' '.join(parts[:-1]), ' '.join(parts[-1]))
-    return result
+            first, last = (' '.join(parts[:-1]), ' '.join(parts[-1]))
+    return first, last
 
 
 def parse_arguments():
@@ -264,8 +264,8 @@ def main(noop=False):
                         profile = hatchbuck.update(profile['contactId'],
                                                    {'status': 'Customer'})
                     elif 'Opportunity' in categories:
-                        profile = hatchbuck.update(profile['contactId'], {
-                            'status': 'Customer Opportunity'})
+                        profile = hatchbuck.update(profile['contactId'],
+                                                   {'status': 'Opportunity'})
                     else:
                         pass
 
@@ -275,12 +275,13 @@ def main(noop=False):
 
                     # update profile with information from odoo
                     if profile.get('firstName', '') == '':
-                        firstname = split_name(child.name)
+                        firstname, _ = split_name(child.name)
                         profile = hatchbuck.profile_add(profile, 'firstName',
                                                         None, firstname)
                     if profile.get('lastName', '') == '':
-                        lastname = split_name(child.name)
-                        profile = hatchbuck.profile_add(profile, 'lastName',
+                        _, lastname = split_name(child.name)
+                        profile = hatchbuck.profile_add(profile,
+                                                        'lastName',
                                                         None, lastname)
                     for addr in emails:
                         profile = hatchbuck.profile_add(profile, 'emails',
@@ -323,11 +324,12 @@ def main(noop=False):
                                                             address,
                                                             kind)
                     # # Add website to Hatchbuck Contact
-                    profile = hatchbuck.profile_add(profile,
-                                                    'website',
-                                                    'websiteUrl',
-                                                    child.website
-                                                    )
+                    if child.website:
+                        profile = hatchbuck.profile_add(profile,
+                                                        'website',
+                                                        'websiteUrl',
+                                                        child.website
+                                                        )
                     # Add phones and mobile to Hatchbuck Contact
                     if child.phone:
                         profile = hatchbuck.profile_add(profile,
@@ -352,19 +354,18 @@ def main(noop=False):
                                                         child.comment,
                                                         {'type': 'MText'}
                                                         )
-                    if child.total_invoiced:
-                        profile = hatchbuck.profile_add(profile,
-                                                        'customFields',
-                                                        'name',
-                                                        child.total_invoiced,
-                                                        {'type': 'Number'}
-                                                        )
                     profile = hatchbuck.profile_add(profile,
                                                     'customFields',
                                                     'name',
                                                     child.lang,
                                                     {'type': 'Text'}
                                                     )
+                    # profile = hatchbuck.profile_add(profile,
+                    #                                 'customFields',
+                    #                                 'name',
+                    #                                 child.total_invoiced,
+                    #                                 {'type': 'Number'}
+                    #                                 )
                     # Add tag field to Hatchbuck Contact
                     hatchbuck.add_tag(profile['contactId'], 'ERP')
 
