@@ -7,15 +7,13 @@ import logging
 import os
 import re
 import odoorpc
-from dotenv import load_dotenv  # pylint: disable=import-error
+from dotenv import load_dotenv
 from hatchbuck import Hatchbuck
 
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-nested-blocks
-# pylint: disable=invalid-name
-# pylint: disable=redefined-outer-name
 
 LOGFORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
@@ -27,7 +25,6 @@ def split_name(fullname):
     parts = fullname.strip().split(' ')
     if len(parts) < 2:
         # oops, no first/lastname
-        # raise Exception("only 1 word passed as first/lastname")
         first, last = ('', parts[0])
     elif len(parts) == 2:
         # the trivial case
@@ -51,8 +48,8 @@ def parse_arguments():
                              ' just log what would have been posted',
                         action='store_true',
                         default=False)
-    args = parser.parse_args()
-    return args
+    args_parser = parser.parse_args()
+    return args_parser
 
 
 def main(noop=False):
@@ -373,5 +370,5 @@ def main(noop=False):
 if __name__ == "__main__":
     # load settings from .env for development
     load_dotenv()
-    args = parse_arguments()
-    main(noop=args.noop)
+    ARG = parse_arguments()
+    main(noop=ARG.noop)

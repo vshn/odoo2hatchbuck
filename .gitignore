@@ -4,3 +4,4 @@ venv/
 .pytest_cache
 cache
 .idea
+__pycache__/
