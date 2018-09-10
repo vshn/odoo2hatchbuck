@@ -278,8 +278,7 @@ def main(noop=False):
                                                         None, firstname)
                     if profile.get('lastName', '') == '':
                         _, lastname = split_name(child.name)
-                        profile = hatchbuck.profile_add(profile,
-                                                        'lastName',
+                        profile = hatchbuck.profile_add(profile, 'lastName',
                                                         None, lastname)
                     for addr in emails:
                         profile = hatchbuck.profile_add(profile, 'emails',
@@ -321,14 +320,14 @@ def main(noop=False):
                     profile = hatchbuck.profile_add_address(profile,
                                                             address,
                                                             kind)
-                    # # Add website to Hatchbuck Contact
+                    # # Add website field to Hatchbuck Contact
                     if child.website:
                         profile = hatchbuck.profile_add(profile,
                                                         'website',
                                                         'websiteUrl',
                                                         child.website
                                                         )
-                    # Add phones and mobile to Hatchbuck Contact
+                    # Add phones and mobile fields to Hatchbuck Contact
                     if child.phone:
                         profile = hatchbuck.profile_add(profile,
                                                         'phones',
@@ -343,7 +342,7 @@ def main(noop=False):
                                                         child.mobile,
                                                         {'type': 'Mobile'}
                                                         )
-                    # Add customFields(comment, total_invoiced, lang) to
+                    # Add customFields(comment, amount_total, lang) to
                     #  Hatchbuck Contact
                     if child.comment:
                         profile = hatchbuck.profile_add(profile,
@@ -363,7 +362,7 @@ def main(noop=False):
                                                      'name': 'Language',
                                                      'value': child.lang}
                                                     )
-                    total = str(round(child.invoice_ids.amount_total, 5))
+                    total = str(round(child.invoice_ids.amount_total, 2))
 
                     profile = hatchbuck.profile_add(profile,
                                                     'customFields',
