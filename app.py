@@ -226,7 +226,8 @@ def main(noop=False):
                         child.zip,
                         child.city,
                         child.country_id.name,
-                        child.total_invoiced,
+                        # child.total_invoiced,
+                        child.invoice_ids.amount_total,
                         child.website,
                         child.comment,
                     )
@@ -349,20 +350,30 @@ def main(noop=False):
                                                         'customFields',
                                                         'name',
                                                         child.comment,
-                                                        {'type': 'MText'}
+                                                        {'type': 'MText',
+                                                         'name': 'Comments',
+                                                         'value': child.comment
+                                                         }
                                                         )
                     profile = hatchbuck.profile_add(profile,
                                                     'customFields',
                                                     'name',
                                                     child.lang,
-                                                    {'type': 'Text'}
+                                                    {'type': 'Text',
+                                                     'name': 'Language',
+                                                     'value': child.lang}
                                                     )
-                    # profile = hatchbuck.profile_add(profile,
-                    #                                 'customFields',
-                    #                                 'name',
-                    #                                 child.total_invoiced,
-                    #                                 {'type': 'Number'}
-                    #                                 )
+                    total = str(round(child.invoice_ids.amount_total, 5))
+
+                    profile = hatchbuck.profile_add(profile,
+                                                    'customFields',
+                                                    'name',
+                                                    total,
+                                                    {'type': 'Number',
+                                                     'name': 'Invoiced',
+                                                     'value':
+                                                         total}
+                                                    )
                     # Add tag field to Hatchbuck Contact
                     hatchbuck.add_tag(profile['contactId'], 'ERP')
 
