@@ -267,6 +267,9 @@ def main(noop=False):
                     else:
                         pass
 
+                    if 'VIP' in categories:
+                        hatchbuck.add_tag(profile['contactId'], 'VIP')
+
                     if child.opt_out:
                         hatchbuck.update(profile['contactId'],
                                          {'subscribed': False})
