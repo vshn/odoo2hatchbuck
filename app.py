@@ -270,7 +270,9 @@ def main(noop=False):
                     else:
                         pass
 
-                    if "VIP" in categories:
+                    if "VIP" in categories and not hatchbuck.profile_contains(
+                        profile, "tags", "name", "VIP"
+                    ):
                         hatchbuck.add_tag(profile["contactId"], "VIP")
 
                     if child.opt_out:
@@ -393,8 +395,11 @@ def main(noop=False):
                         total,
                         {"type": "Number", "name": "Invoiced", "value": total},
                     )
-                    # Add tag field to Hatchbuck Contact
-                    hatchbuck.add_tag(profile["contactId"], "ERP")
+                    # Add ERP tag to Hatchbuck Contact
+                    if not hatchbuck.profile_contains(
+                        profile, "tags", "name", "ERP"
+                    ):
+                        hatchbuck.add_tag(profile["contactId"], "ERP")
 
 
 if __name__ == "__main__":
