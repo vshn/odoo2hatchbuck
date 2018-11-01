@@ -275,6 +275,11 @@ def main(noop=False):
                     ):
                         hatchbuck.add_tag(profile["contactId"], "VIP")
 
+                    if "VIP" not in categories and hatchbuck.profile_contains(
+                        profile, "tags", "name", "VIP"
+                    ):
+                        hatchbuck.remove_tag(profile["contactId"], "VIP")
+
                     if child.opt_out:
                         hatchbuck.update(
                             profile["contactId"], {"subscribed": False}
