@@ -101,6 +101,12 @@ def main(noop=False):
             # browse() is similar to a database result set/pointer
             # it should be able to take a list of IDs
             # but it timeouted for my largish list of IDs
+
+            partner_turnover = sum(
+                contact.invoice_ids.amount_total
+                for contact in partner.child_ids
+            )
+
             for child in partner.child_ids:
                 # child = person/contact in a company
 
@@ -210,24 +216,26 @@ def main(noop=False):
                     (
                         child.name,  # vorname nachname
                         # child.title.name,  # titel ("Dr.")
-                        child.function,  # "DevOps Engineer"
-                        # child.parent_id.name,
+                        # child.function,  # "DevOps Engineer"
+                        # child.parent_id.invoice_ids.amount_total,
                         child.parent_name,  # Firmenname
-                        child.email,
-                        child.mobile,
-                        child.phone,
-                        [cat.name for cat in child.category_id],
-                        child.opt_out,
-                        child.lang,
-                        child.street,
-                        child.street2,
-                        child.zip,
-                        child.city,
-                        child.country_id.name,
+                        # child.email,
+                        # child.mobile,
+                        # child.phone,
+                        # [cat.name for cat in child.category_id],
+                        # child.opt_out,
+                        # child.lang,
+                        # child.street,
+                        # child.street2,
+                        # child.zip,
+                        # child.city,
+                        # child.country_id.name,
                         # child.total_invoiced,
-                        child.invoice_ids.amount_total,
-                        child.website,
-                        child.comment,
+                        # child.invoice_ids.amount_total,
+                        # partner.total_invoiced,
+                        # partner_turnover,
+                        # child.website,
+                        # child.comment,
                     )
                 )
                 categories = [cat.name for cat in child.category_id]
@@ -291,11 +299,13 @@ def main(noop=False):
                         profile = hatchbuck.profile_add(
                             profile, "firstName", None, firstname
                         )
+
                     if profile.get("lastName", "") == "":
                         _, lastname = split_name(child.name)
                         profile = hatchbuck.profile_add(
                             profile, "lastName", None, lastname
                         )
+
                     for addr in emails:
                         profile = hatchbuck.profile_add(
                             profile,
@@ -304,14 +314,17 @@ def main(noop=False):
                             addr,
                             {"type": "Work"},
                         )
-                    if profile.get("title", "") == "":
+
+                    if profile.get("title", "") == "" and child.function:
                         profile = hatchbuck.profile_add(
                             profile, "title", None, child.function
                         )
-                    if profile.get("company", "") == "":
+
+                    if profile.get("company", "") == "" and child.parent_name:
                         profile = hatchbuck.profile_add(
                             profile, "company", None, child.parent_name
                         )
+
                     if profile.get("company", "") == "":
                         # empty company name ->
                         # maybe we can guess the company name
@@ -320,7 +333,7 @@ def main(noop=False):
                         #                format(profile['emails']))
                         pass
 
-                        # clean up company name
+                    # clean up company name
                     if re.match(r";$", profile.get("company", "")):
                         logging.warning(
                             "found unclean company name: %s",
@@ -332,6 +345,7 @@ def main(noop=False):
                             "found unclean company name: %s",
                             format(profile["company"]),
                         )
+
                     # Add address
                     address = {
                         "street": child.street,
@@ -339,16 +353,19 @@ def main(noop=False):
                         "city": child.city,
                         "country": child.country_id.name,
                     }
+
                     kind = "Work"
                     logging.debug("adding address %s %s", address, profile)
                     profile = hatchbuck.profile_add_address(
                         profile, address, kind
                     )
+
                     # # Add website field to Hatchbuck Contact
                     if child.website:
                         profile = hatchbuck.profile_add(
                             profile, "website", "websiteUrl", child.website
                         )
+
                     # Add phones and mobile fields to Hatchbuck Contact
                     if child.phone:
                         profile = hatchbuck.profile_add(
@@ -358,6 +375,7 @@ def main(noop=False):
                             child.phone,
                             {"type": "Work"},
                         )
+
                     if child.mobile:
                         profile = hatchbuck.profile_add(
                             profile,
@@ -366,6 +384,7 @@ def main(noop=False):
                             child.mobile,
                             {"type": "Mobile"},
                         )
+
                     # Add customFields(comment, amount_total, lang) to
                     #  Hatchbuck Contact
                     if child.comment:
@@ -380,6 +399,7 @@ def main(noop=False):
                                 "value": child.comment,
                             },
                         )
+
                     profile = hatchbuck.profile_add(
                         profile,
                         "customFields",
@@ -391,7 +411,8 @@ def main(noop=False):
                             "value": child.lang,
                         },
                     )
-                    total = str(round(child.invoice_ids.amount_total, 2))
+
+                    total = str(round(partner_turnover, 2))
 
                     profile = hatchbuck.profile_add(
                         profile,
@@ -400,6 +421,7 @@ def main(noop=False):
                         total,
                         {"type": "Number", "name": "Invoiced", "value": total},
                     )
+
                     # Add ERP tag to Hatchbuck Contact
                     if not hatchbuck.profile_contains(
                         profile, "tags", "name", "ERP"
