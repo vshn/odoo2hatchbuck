@@ -107,10 +107,19 @@ def main(noop=False, company=False):
             # it should be able to take a list of IDs
             # but it timeouted for my largish list of IDs
 
-            # partner_turnover = sum(
-            #     contact.invoice_ids.amount_total
-            #     for contact in partner.child_ids
-            # )
+            logging.debug(
+                (
+                    partner.total_invoiced,
+                    type(partner.total_invoiced),
+                    callable(partner.total_invoiced),
+                )
+            )
+
+            if callable(partner.total_invoiced):
+                partner_turnover = partner.total_invoiced()
+                logging.debug((partner_turnover, type(partner_turnover)))
+            else:
+                partner_turnover = str(partner.total_invoiced)
 
             for child in partner.child_ids:
                 # child = person/contact in a company
@@ -409,19 +418,11 @@ def main(noop=False, company=False):
                         {"name": "Language"},
                     )
 
-                    logging.debug(
-                        (
-                            partner.total_invoiced,
-                            type(partner.total_invoiced),
-                            callable(partner.total_invoiced),
-                        )
-                    )
-
                     profile = hatchbuck.profile_add(
                         profile,
                         "customFields",
                         "value",
-                        str(partner.total_invoiced),
+                        partner_turnover,
                         {"name": "Invoiced"},
                     )
 
