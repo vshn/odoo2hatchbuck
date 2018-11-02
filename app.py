@@ -107,19 +107,13 @@ def main(noop=False, company=False):
             # it should be able to take a list of IDs
             # but it timeouted for my largish list of IDs
 
-            logging.debug(
-                (
-                    partner.total_invoiced,
-                    type(partner.total_invoiced),
-                    callable(partner.total_invoiced),
-                )
-            )
-
-            if callable(partner.total_invoiced):
-                partner_turnover = partner.total_invoiced()
-                logging.debug((partner_turnover, type(partner_turnover)))
-            else:
-                partner_turnover = str(partner.total_invoiced)
+            partner_turnover = str(round(partner.total_invoiced))
+            # looking at
+            # https://github.com
+            # /odoo/odoo/blob/master/addons/account/models/partner.py#L260
+            # this uses account.invoice.report in the background and returns 0
+            # if the user does not have access to it
+            # permission: "Accounting & Finance": "Invoicing & Payments"
 
             for child in partner.child_ids:
                 # child = person/contact in a company
