@@ -409,6 +409,10 @@ def main(noop=False, company=False):
                         {"name": "Language"},
                     )
 
+                    logging.debug(
+                        (partner.total_invoiced, type(partner.total_invoiced))
+                    )
+
                     profile = hatchbuck.profile_add(
                         profile,
                         "customFields",
