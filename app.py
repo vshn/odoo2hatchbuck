@@ -51,11 +51,14 @@ def parse_arguments():
         action="store_true",
         default=False,
     )
+    parser.add_argument(
+        "-c", "--company", help="filter for company name", default=False
+    )
     args_parser = parser.parse_args()
     return args_parser
 
 
-def main(noop=False):
+def main(noop=False, company=False):
     """
     Fetch Odoo ERP customer info
     """
@@ -91,9 +94,11 @@ def main(noop=False):
 
     partnerenv = odoo.env["res.partner"]
     # search for all partners that are customers AND companies
-    partner_ids = partnerenv.search(
-        [("customer", "=", True), ("is_company", "=", True)]
-    )
+    odoo_filter = [("customer", "=", True), ("is_company", "=", True)]
+    # optionally filter partner company name, mostly used for debugging
+    if company:
+        odoo_filter.append(("name", "ilike", company))
+    partner_ids = partnerenv.search(odoo_filter)
 
     # logging.debug(partner_ids)
     for pid in partner_ids:
@@ -102,10 +107,10 @@ def main(noop=False):
             # it should be able to take a list of IDs
             # but it timeouted for my largish list of IDs
 
-            partner_turnover = sum(
-                contact.invoice_ids.amount_total
-                for contact in partner.child_ids
-            )
+            # partner_turnover = sum(
+            #     contact.invoice_ids.amount_total
+            #     for contact in partner.child_ids
+            # )
 
             for child in partner.child_ids:
                 # child = person/contact in a company
@@ -218,7 +223,7 @@ def main(noop=False):
                         # child.title.name,  # titel ("Dr.")
                         # child.function,  # "DevOps Engineer"
                         # child.parent_id.invoice_ids.amount_total,
-                        child.parent_name,  # Firmenname
+                        partner.name,  # Firmenname
                         # child.email,
                         # child.mobile,
                         # child.phone,
@@ -391,35 +396,25 @@ def main(noop=False):
                         profile = hatchbuck.profile_add(
                             profile,
                             "customFields",
-                            "name",
+                            "value",
                             child.comment,
-                            {
-                                "type": "MText",
-                                "name": "Comments",
-                                "value": child.comment,
-                            },
+                            {"name": "Comments"},
                         )
 
                     profile = hatchbuck.profile_add(
                         profile,
                         "customFields",
-                        "name",
+                        "value",
                         child.lang,
-                        {
-                            "type": "Text",
-                            "name": "Language",
-                            "value": child.lang,
-                        },
+                        {"name": "Language"},
                     )
-
-                    total = str(round(partner_turnover, 2))
 
                     profile = hatchbuck.profile_add(
                         profile,
                         "customFields",
-                        "name",
-                        total,
-                        {"type": "Number", "name": "Invoiced", "value": total},
+                        "value",
+                        str(round(partner.total_invoiced)),
+                        {"name": "Invoiced"},
                     )
 
                     # Add ERP tag to Hatchbuck Contact
@@ -433,4 +428,4 @@ if __name__ == "__main__":
     # load settings from .env for development
     load_dotenv()
     ARG = parse_arguments()
-    main(noop=ARG.noop)
+    main(noop=ARG.noop, company=ARG.company)
