@@ -34,7 +34,7 @@ def split_name(fullname):
         if parts[-2].lower() in ["van", "von", "de", "zu", "da"]:
             first, last = (" ".join(parts[:-2]), " ".join(parts[-2:]))
         else:
-            first, last = (" ".join(parts[:-1]), " ".join(parts[-1]))
+            first, last = (" ".join(parts[:-1]), " ".join(parts[-1:]))
     return first, last
 
 
@@ -413,7 +413,7 @@ def main(noop=False, company=False):
                         profile,
                         "customFields",
                         "value",
-                        str(round(partner.total_invoiced)),
+                        str(int(partner.total_invoiced)),
                         {"name": "Invoiced"},
                     )
 
