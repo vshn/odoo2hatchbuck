@@ -410,7 +410,11 @@ def main(noop=False, company=False):
                     )
 
                     logging.debug(
-                        (partner.total_invoiced, type(partner.total_invoiced))
+                        (
+                            partner.total_invoiced,
+                            type(partner.total_invoiced),
+                            callable(partner.total_invoiced),
+                        )
                     )
 
                     profile = hatchbuck.profile_add(
