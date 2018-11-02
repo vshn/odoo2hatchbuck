@@ -413,7 +413,7 @@ def main(noop=False, company=False):
                         profile,
                         "customFields",
                         "value",
-                        str(int(partner.total_invoiced)),
+                        str(partner.total_invoiced),
                         {"name": "Invoiced"},
                     )
 
