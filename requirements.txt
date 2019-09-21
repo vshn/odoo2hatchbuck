@@ -6,7 +6,7 @@ idna==2.7
 OdooRPC==0.6.2
 packaging==18.0
 pluggy==0.8.0
-py==1.7.0
+py==1.8.0
 pycountry==18.5.26
 pyparsing==2.3.0
 python-dotenv==0.9.1
