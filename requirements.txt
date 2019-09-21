@@ -3,7 +3,7 @@ chardet==3.0.4
 filelock==3.0.10
 hatchbuck==1.0.17
 idna==2.7
-OdooRPC==0.6.2
+OdooRPC==0.7.0
 packaging==18.0
 pluggy==0.8.0
 py==1.7.0
