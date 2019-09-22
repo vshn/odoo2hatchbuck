@@ -6,6 +6,7 @@ import argparse
 import logging
 import os
 import re
+
 import odoorpc
 from dotenv import load_dotenv
 from hatchbuck import Hatchbuck
@@ -66,9 +67,7 @@ def main(noop=False, company=False):
 
     hatchbuck = Hatchbuck(os.environ.get("HATCHBUCK_APIKEY"), noop=noop)
 
-    odoo = odoorpc.ODOO(
-        os.environ.get("ODOO_HOST"), protocol="jsonrpc+ssl", port=443
-    )
+    odoo = odoorpc.ODOO(os.environ.get("ODOO_HOST"), protocol="jsonrpc+ssl", port=443)
     odoodb = os.environ.get("ODOO_DB", False)
     if not odoodb:
         # if the DB is not configured pick the first in the list
@@ -76,11 +75,7 @@ def main(noop=False, company=False):
         odoodbs = odoo.db.list()
         odoodb = odoodbs[0]
 
-    odoo.login(
-        odoodb,
-        os.environ.get("ODOO_USERNAME"),
-        os.environ.get("ODOO_PASSWORD"),
-    )
+    odoo.login(odoodb, os.environ.get("ODOO_USERNAME"), os.environ.get("ODOO_PASSWORD"))
 
     logging.debug(odoo.env)
 
@@ -269,9 +264,7 @@ def main(noop=False, company=False):
                         profile["status"] = {"name": "Customer"}
                         profile["emails"] = []
                         for addr in emails:
-                            profile["emails"].append(
-                                {"address": addr, "type": "Work"}
-                            )
+                            profile["emails"].append({"address": addr, "type": "Work"})
                         profile = hatchbuck.create(profile)
                         logging.info("added profile: %s", profile)
 
@@ -297,9 +290,7 @@ def main(noop=False, company=False):
                         hatchbuck.remove_tag(profile["contactId"], "VIP")
 
                     if child.opt_out:
-                        hatchbuck.update(
-                            profile["contactId"], {"subscribed": False}
-                        )
+                        hatchbuck.update(profile["contactId"], {"subscribed": False})
 
                     # update profile with information from odoo
                     if profile.get("firstName", "") == "":
@@ -316,11 +307,7 @@ def main(noop=False, company=False):
 
                     for addr in emails:
                         profile = hatchbuck.profile_add(
-                            profile,
-                            "emails",
-                            "address",
-                            addr,
-                            {"type": "Work"},
+                            profile, "emails", "address", addr, {"type": "Work"}
                         )
 
                     if profile.get("title", "") == "" and child.function:
@@ -344,14 +331,12 @@ def main(noop=False, company=False):
                     # clean up company name
                     if re.match(r";$", profile.get("company", "")):
                         logging.warning(
-                            "found unclean company name: %s",
-                            format(profile["company"]),
+                            "found unclean company name: %s", format(profile["company"])
                         )
 
                     if re.match(r"\|", profile.get("company", "")):
                         logging.warning(
-                            "found unclean company name: %s",
-                            format(profile["company"]),
+                            "found unclean company name: %s", format(profile["company"])
                         )
 
                     # Add address
@@ -364,9 +349,7 @@ def main(noop=False, company=False):
 
                     kind = "Work"
                     logging.debug("adding address %s %s", address, profile)
-                    profile = hatchbuck.profile_add_address(
-                        profile, address, kind
-                    )
+                    profile = hatchbuck.profile_add_address(profile, address, kind)
 
                     # # Add website field to Hatchbuck Contact
                     if child.website:
@@ -377,11 +360,7 @@ def main(noop=False, company=False):
                     # Add phones and mobile fields to Hatchbuck Contact
                     if child.phone:
                         profile = hatchbuck.profile_add(
-                            profile,
-                            "phones",
-                            "number",
-                            child.phone,
-                            {"type": "Work"},
+                            profile, "phones", "number", child.phone, {"type": "Work"}
                         )
 
                     if child.mobile:
@@ -421,9 +400,7 @@ def main(noop=False, company=False):
                     )
 
                     # Add ERP tag to Hatchbuck Contact
-                    if not hatchbuck.profile_contains(
-                        profile, "tags", "name", "ERP"
-                    ):
+                    if not hatchbuck.profile_contains(profile, "tags", "name", "ERP"):
                         hatchbuck.add_tag(profile["contactId"], "ERP")
 
 
