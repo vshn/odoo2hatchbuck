@@ -12,4 +12,4 @@ odoorpc==0.7.0
 pycountry==19.8.18        # via hatchbuck
 python-dotenv==0.10.3
 requests==2.22.0          # via hatchbuck
-urllib3==1.25.5           # via requests
+urllib3==1.25.6           # via requests

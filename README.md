@@ -1,8 +1,7 @@
 Odoo to Hatchbuck CRM
 =====================
 
-[![Build Status](https://travis-ci.org/vshn/odoo2hatchbuck.png)](https://travis-ci.org/vshn/odoo2hatchbuck)
-
+[![Build Status](https://travis-ci.com/vshn/odoo2hatchbuck.svg?branch=master)](https://travis-ci.com/vshn/odoo2hatchbuck)
 
 This application will sync Odoo ERP customer contacts to Hatchbuck CRM
 
