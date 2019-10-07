@@ -9,6 +9,7 @@ import re
 import sys
 
 import odoorpc
+import sentry_sdk
 from dotenv import load_dotenv
 from hatchbuck import Hatchbuck
 
@@ -453,5 +454,6 @@ def main(noop=False, company=False, verbose=False):
 if __name__ == "__main__":
     # load settings from .env for development
     load_dotenv()
+    sentry_sdk.init()
     ARG = parse_arguments()
     main(noop=ARG.noop, company=ARG.company, verbose=ARG.verbose)

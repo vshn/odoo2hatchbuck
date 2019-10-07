@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements.in
 #
-certifi==2019.9.11        # via requests
+certifi==2019.9.11        # via requests, sentry-sdk
 chardet==3.0.4            # via requests
 hatchbuck==1.0.20
 idna==2.8                 # via requests
@@ -12,4 +12,5 @@ odoorpc==0.7.0
 pycountry==19.8.18        # via hatchbuck
 python-dotenv==0.10.3
 requests==2.22.0          # via hatchbuck
-urllib3==1.25.6           # via requests
+sentry-sdk==0.12.3
+urllib3==1.25.6           # via requests, sentry-sdk
