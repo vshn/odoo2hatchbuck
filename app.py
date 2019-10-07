@@ -6,7 +6,6 @@ import argparse
 import logging
 import os
 import re
-import sys
 
 import odoorpc
 from dotenv import load_dotenv
@@ -290,7 +289,6 @@ def main(noop=False, company=False, verbose=False):
                         logging.info("added profile: %s", profile)
                         if profile is None:
                             logging.error("adding contact failed: %s", profile)
-                            sys.exit(1)
                     else:
                         logging.info("contact found: %s", profile)
 
