@@ -263,8 +263,12 @@ def main(noop=False, company=False, verbose=False):
                         if (
                             "Customer" not in categories
                             and "Opportunity" not in categories
+                            and "Partner" not in categories
                         ):
                             # don't add administrative contacts to CRM
+                            logging.info(
+                                "not adding contact because no relevant category"
+                            )
                             continue
 
                         # create profile
@@ -279,6 +283,9 @@ def main(noop=False, company=False, verbose=False):
                             profile["emails"].append({"address": addr, "type": "Work"})
                         profile = hatchbuck.create(profile)
                         logging.info("added profile: %s", profile)
+                        if profile is None:
+                            logging.error("adding contact failed: %s", profile)
+                            os._exit(1)
                     else:
                         logging.info("contact found: %s", profile)
 
