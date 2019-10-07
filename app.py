@@ -252,8 +252,11 @@ def main(noop=False, company=False, verbose=False):
                 )
                 categories = [cat.name for cat in child.category_id]
 
-                if child.email:
-                    emails = [x.strip() for x in child.email.split(",")]
+                if not child.email:
+                    logging.error("no email found for contact")
+                else:
+                    emails = child.email.replace("mailto:", "")
+                    emails = [x.strip() for x in emails.split(",")]
                     profile = hatchbuck.search_email_multi(emails)
                     if profile is None:
                         logging.debug("user not found in CRM")
@@ -292,6 +295,13 @@ def main(noop=False, company=False, verbose=False):
                         else:
                             profile = hatchbuck.update(
                                 profile["contactId"], {"status": "Opportunity"}
+                            )
+                    elif "Partner" in categories:
+                        if noop:
+                            profile["status"] = "Partner"
+                        else:
+                            profile = hatchbuck.update(
+                                profile["contactId"], {"status": "Partner"}
                             )
                     else:
                         pass
