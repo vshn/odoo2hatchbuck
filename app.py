@@ -252,8 +252,8 @@ def main(noop=False, company=False, verbose=False):
                 )
                 categories = [cat.name for cat in child.category_id]
 
-                if not child.email:
-                    logging.error("no email found for contact")
+                if not child.email or not "@" in child.email or not "." in child.email:
+                    logging.error("no email found for contact or does not look like email: %s", child.email)
                 else:
                     emails = child.email.replace("mailto:", "")
                     emails = [x.strip() for x in emails.split(",")]
