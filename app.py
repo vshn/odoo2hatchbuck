@@ -6,6 +6,7 @@ import argparse
 import logging
 import os
 import re
+import sys
 
 import odoorpc
 from dotenv import load_dotenv
@@ -252,8 +253,11 @@ def main(noop=False, company=False, verbose=False):
                 )
                 categories = [cat.name for cat in child.category_id]
 
-                if not child.email or not "@" in child.email or not "." in child.email:
-                    logging.error("no email found for contact or does not look like email: %s", child.email)
+                if not child.email or "@" not in child.email or "." not in child.email:
+                    logging.error(
+                        "no email found for contact or does not look like email: %s",
+                        child.email,
+                    )
                 else:
                     emails = child.email.replace("mailto:", "")
                     emails = [x.strip() for x in emails.split(",")]
@@ -285,7 +289,7 @@ def main(noop=False, company=False, verbose=False):
                         logging.info("added profile: %s", profile)
                         if profile is None:
                             logging.error("adding contact failed: %s", profile)
-                            os._exit(1)
+                            sys.exit(1)
                     else:
                         logging.info("contact found: %s", profile)
 
