@@ -9,9 +9,10 @@ import re
 import sys
 
 import odoorpc
-import sentry_sdk
 from dotenv import load_dotenv
 from hatchbuck import Hatchbuck
+
+import sentry_sdk
 
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-branches
@@ -254,11 +255,10 @@ def main(noop=False, company=False, verbose=False):
                 )
                 categories = [cat.name for cat in child.category_id]
 
-                if not child.email or "@" not in child.email or "." not in child.email:
-                    logging.error(
-                        "no email found for contact or does not look like email: %s",
-                        child.email,
-                    )
+                if not child.email:
+                    logging.info("no email")
+                elif "@" not in child.email or "." not in child.email:
+                    logging.error("email does not look like email: %s", child.email)
                 else:
                     emails = child.email.replace("mailto:", "")
                     emails = [x.strip() for x in emails.split(",")]
