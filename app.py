@@ -254,7 +254,7 @@ def main(noop=False, company=False, verbose=False):
                 )
                 categories = [cat.name for cat in child.category_id]
 
-                if not child.email:
+                if not child.email or child.email == "false":
                     logging.info("no email")
                 elif "@" not in child.email or "." not in child.email:
                     logging.error("email does not look like email: %s", child.email)
