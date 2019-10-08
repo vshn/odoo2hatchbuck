@@ -289,6 +289,7 @@ def main(noop=False, company=False, verbose=False):
                         logging.info("added profile: %s", profile)
                         if profile is None:
                             logging.error("adding contact failed: %s", profile)
+                            continue
                     else:
                         logging.info("contact found: %s", profile)
 
