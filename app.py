@@ -252,7 +252,8 @@ def main(noop=False, partnerfilter=False, verbose=False):
             if not child.email or child.email == "false":
                 logging.info("no email")
                 continue
-            elif "@" not in child.email or "." not in child.email:
+
+            if "@" not in child.email or "." not in child.email:
                 logging.error("email does not look like email: %s", child.email)
                 continue
 
