@@ -15,4 +15,5 @@ ODOO_USERNAME=myusername
 ODOO_PASSWORD=mypassword
 HATCHBUCK_APIKEY=ABC123DEF456
 SENTRY_DSN=https://<key>@sentry.io/<project> (optional)
+EMPLOYEE_COMPANYNAME="Example Company Inc"
 ```

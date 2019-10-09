@@ -24,10 +24,10 @@ LOGFORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 # in order of occurrence, first match wins
 STATUSMAP = collections.OrderedDict()
 STATUSMAP["Employee"] = "Employee"
-STATUSMAP["Alumni"] = "Former Employee"
 STATUSMAP["Customer"] = "Customer"
-STATUSMAP["Opportunity"] = "Customer Opportunity"
 STATUSMAP["Partner"] = "Partner"
+STATUSMAP["Alumni"] = "Former Employee"
+STATUSMAP["Opportunity"] = "Customer Opportunity"
 STATUSMAP["Friend"] = "Friend"
 
 
@@ -345,7 +345,14 @@ def main(noop=False, partnerfilter=False, verbose=False):
                 logging.info("updating title: %s", child.function)
                 profile = hatchbuck.profile_add(profile, "title", None, child.function)
 
-            if profile.get("company", "") == "" and child.parent_name:
+            if profile["status"] == "Employee" and os.environ.get(
+                "EMPLOYEE_COMPANYNAME", False
+            ):
+                logging.info("updating company: %s", child.parent_name)
+                profile = hatchbuck.profile_add(
+                    profile, "company", None, os.environ.get("EMPLOYEE_COMPANYNAME")
+                )
+            elif profile.get("company", "") == "" and child.parent_name:
                 logging.info("updating company: %s", child.parent_name)
                 profile = hatchbuck.profile_add(
                     profile, "company", None, child.parent_name
