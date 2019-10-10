@@ -452,6 +452,6 @@ def main(noop=False, partnerfilter=False, verbose=False):
 if __name__ == "__main__":
     # load settings from .env for development
     load_dotenv()
-    sentry_sdk.init()
+    sentry_sdk.init(release=os.environ.get("OPENSHIFT_BUILD_NAME"))
     ARG = parse_arguments()
     main(noop=ARG.noop, partnerfilter=ARG.filter, verbose=ARG.verbose)
