@@ -410,6 +410,9 @@ def main(noop=False, partnerfilter=False, verbose=False):
                     profile, "phones", "number", child.mobile, {"type": "Mobile"}
                 )
 
+            # format & deduplicate all phone numbers
+            profile = hatchbuck.clean_all_phone_numbers(profile)
+
             # Add customFields(comment, amount_total, lang) to
             #  Hatchbuck Contact
             if child.comment:
