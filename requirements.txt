@@ -9,7 +9,7 @@ chardet==3.0.4            # via requests
 hatchbuck==1.0.22
 idna==2.8                 # via requests
 odoorpc==0.7.0
-pycountry==19.8.18        # via hatchbuck
+pycountry==20.7.3        # via hatchbuck
 python-dotenv==0.10.3
 requests==2.22.0          # via hatchbuck
 sentry-sdk==0.13.2
