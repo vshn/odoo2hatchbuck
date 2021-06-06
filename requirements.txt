@@ -13,4 +13,4 @@ pycountry==19.8.18        # via hatchbuck
 python-dotenv==0.10.3
 requests==2.22.0          # via hatchbuck
 sentry-sdk==0.13.2
-urllib3==1.25.6           # via requests, sentry-sdk
+urllib3==1.26.5           # via requests, sentry-sdk
